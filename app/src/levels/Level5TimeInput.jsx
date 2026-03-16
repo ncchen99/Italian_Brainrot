@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import NumericKeypad from '../components/NumericKeypad';
 import Modal from '../components/Modal';
 import { ingredientImages, uiImages } from '../assets';
+import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 
 export default function Level5TimeInput() {
   const navigate = useNavigate();
   const [timeInput, setTimeInput] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const { isCoolingDown, remainingMs, triggerCooldown } = useLevelCooldown('level5');
 
   const prevLocks = ["01:15", "02:30", "04:00", "05:45"];
   const correctTime = "0745"; // 07:45
@@ -24,9 +26,12 @@ export default function Level5TimeInput() {
   };
 
   const handleSubmit = () => {
+    if (isCoolingDown) return;
+
     if (timeInput === correctTime) {
       setShowSuccess(true);
     } else {
+      triggerCooldown();
       setShowError(true);
       setTimeInput('');
     }
@@ -71,7 +76,7 @@ export default function Level5TimeInput() {
       </div>
 
       <Modal 
-        isOpen={showSuccess} 
+        isOpen={showSuccess && !isCoolingDown} 
         onClose={() => navigate('/dashboard')}
         title="鬧鐘重啟成功"
         type="success"
@@ -92,12 +97,24 @@ export default function Level5TimeInput() {
 
       <Modal 
         isOpen={showError} 
-        onClose={() => setShowError(false)}
-        title="密碼錯誤"
+        onClose={() => { setShowError(false); navigate('/dashboard'); }}
+        title="密碼錯誤，進入冷卻"
         type="error"
         showCloseButton={true}
       >
-        <p className="text-white">鬧鐘發出嗶嗶聲並鎖死了！請重新計算時間間隔的規律！</p>
+        <p className="text-white">鬧鐘發出嗶嗶聲並鎖死了！請稍後再試。</p>
+        <p className="text-sm text-pink-200 mt-2">冷卻時間：{formatCooldownTime(remainingMs)}</p>
+      </Modal>
+
+      <Modal
+        isOpen={isCoolingDown && !showError}
+        onClose={() => navigate('/dashboard')}
+        title="關卡冷卻中"
+        type="warning"
+        showCloseButton={true}
+      >
+        <p className="text-white">你剛剛答錯了，請先去其他關卡探索。</p>
+        <p className="text-[#FBBF24] font-bold mt-2">剩餘時間：{formatCooldownTime(remainingMs)}</p>
       </Modal>
 
     </div>

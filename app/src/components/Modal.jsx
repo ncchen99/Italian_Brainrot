@@ -72,6 +72,7 @@ export default function Modal({
               className={`w-full py-3 mt-5 rounded-xl font-bold text-white transition-transform active:scale-95 border-b-4 
                 ${type === 'success' ? 'bg-[#22c55e] border-[#166534] hover:bg-[#16a34a]' : 
                   type === 'error' ? 'bg-[#db2777] border-[#9d174d] hover:bg-[#be185d]' : 
+                  type === 'warning' ? 'bg-[#f59e0b] border-[#b45309] hover:bg-[#d97706]' :
                   'bg-[#7C5CFC] border-[#5b41c2] hover:bg-[#6b4ade]'
                 }`}
             >

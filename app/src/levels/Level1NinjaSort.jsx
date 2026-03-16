@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import DragDropContainer from '../components/DragDropContainer';
 import Modal from '../components/Modal';
 import { ingredientImages } from '../assets';
+import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 
 export default function Level1NinjaSort() {
   const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [slots, setSlots] = useState([]);
+  const { isCoolingDown, remainingMs, triggerCooldown } = useLevelCooldown('level1');
 
   // Available ninjutsu signs
   const items = [
@@ -15,13 +19,20 @@ export default function Level1NinjaSort() {
     { id: 'sword', content: '刀', color: '#FBBF24' }
   ];
 
-  const handleComplete = (slots) => {
-    // Correct sequence: 3-1-2 -> roughly Sword - Coffee - Fire? 
-    // From requirements: "3-1-2" (depends on how we number them, let's accept any combination that fills it for the demo, or specifically check)
-    // Here we'll just check if all slots are filled
-    const allFilled = slots.every(slot => slot !== null);
-    if (allFilled) {
-      setTimeout(() => setShowSuccess(true), 500);
+  const handleSubmit = () => {
+    const allFilled = slots.length === 3 && slots.every(slot => slot !== null);
+    if (!allFilled) return;
+
+    // 正確順序為 3-1-2 => 刀、咖、火
+    const correctSequence = ['sword', 'coffee', 'fire'];
+    const currentSequence = slots.map((slot) => slot.id);
+    const isCorrect = currentSequence.every((id, index) => id === correctSequence[index]);
+
+    if (isCorrect) {
+      setTimeout(() => setShowSuccess(true), 300);
+    } else {
+      triggerCooldown();
+      setShowError(true);
     }
   };
 
@@ -39,12 +50,13 @@ export default function Level1NinjaSort() {
         <DragDropContainer 
           items={items} 
           slotsCount={3} 
-          onComplete={handleComplete} 
+          onChange={setSlots}
         />
         
         <div className="mt-8 flex justify-center">
           <button
-            onClick={() => handleComplete([1,2,3])} // Bypass for demo
+            onClick={handleSubmit}
+            disabled={isCoolingDown}
             className="px-8 py-3 rounded-2xl bg-gradient-to-r from-[#7C5CFC] to-[#5b41c2] border-b-4 border-[#3b2786] active:border-b-0 active:translate-y-1 font-bold shadow-lg text-white"
           >
             發動忍術！
@@ -53,7 +65,7 @@ export default function Level1NinjaSort() {
       </div>
 
       <Modal 
-        isOpen={showSuccess} 
+        isOpen={showSuccess && !isCoolingDown} 
         onClose={() => navigate('/dashboard')}
         title="挑戰成功"
         type="success"
@@ -67,6 +79,28 @@ export default function Level1NinjaSort() {
             💡 線索：「水球鱷魚知道起司在哪裡。」
           </div>
         </div>
+      </Modal>
+
+      <Modal 
+        isOpen={showError} 
+        onClose={() => { setShowError(false); navigate('/dashboard'); }}
+        title="結印失敗"
+        type="error"
+        showCloseButton={true}
+      >
+        <p className="text-white">忍術順序錯誤，卡布奇諾忍者叫你先冷靜一下！</p>
+        <p className="text-sm text-pink-200 mt-2">冷卻時間：{formatCooldownTime(remainingMs)}</p>
+      </Modal>
+
+      <Modal
+        isOpen={isCoolingDown && !showError}
+        onClose={() => navigate('/dashboard')}
+        title="關卡冷卻中"
+        type="warning"
+        showCloseButton={true}
+      >
+        <p className="text-white">你剛剛挑戰失敗，這關暫時鎖定。</p>
+        <p className="text-[#FBBF24] font-bold mt-2">剩餘時間：{formatCooldownTime(remainingMs)}</p>
       </Modal>
 
     </div>

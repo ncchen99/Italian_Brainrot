@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import NumericKeypad from '../components/NumericKeypad';
 import Modal from '../components/Modal';
 import { uiImages } from '../assets';
+import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 
 export default function Level7AntennaSync() {
   const navigate = useNavigate();
   const [syncCode, setSyncCode] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const { isCoolingDown, remainingMs, triggerCooldown } = useLevelCooldown('level7');
   
   // Randomly assign team A or B (Red or Blue antenna)
   const [teamColor] = useState(() => (Math.random() > 0.5 ? 'red' : 'blue'));
@@ -24,10 +26,13 @@ export default function Level7AntennaSync() {
   };
 
   const handleSubmit = () => {
+    if (isCoolingDown) return;
+
     // Demo correct code 888888
     if (syncCode === '888888') {
       setShowSuccess(true);
     } else {
+      triggerCooldown();
       setShowError(true);
       setSyncCode('');
     }
@@ -87,7 +92,7 @@ export default function Level7AntennaSync() {
       </div>
 
       <Modal 
-        isOpen={showSuccess} 
+        isOpen={showSuccess && !isCoolingDown} 
         onClose={() => navigate('/synthesis')}
         title="防護罩破解成功"
         type="success"
@@ -105,12 +110,24 @@ export default function Level7AntennaSync() {
 
       <Modal 
         isOpen={showError} 
-        onClose={() => setShowError(false)}
-        title="通訊失敗"
+        onClose={() => { setShowError(false); navigate('/dashboard'); }}
+        title="通訊失敗，進入冷卻"
         type="error"
         showCloseButton={true}
       >
-        <p className="text-white">防護罩依然堅固！請跟友隊確認密碼順序是否正確！</p>
+        <p className="text-white">防護罩依然堅固！請跟友隊確認密碼順序是否正確。</p>
+        <p className="text-sm text-pink-200 mt-2">冷卻時間：{formatCooldownTime(remainingMs)}</p>
+      </Modal>
+
+      <Modal
+        isOpen={isCoolingDown && !showError}
+        onClose={() => navigate('/dashboard')}
+        title="關卡冷卻中"
+        type="warning"
+        showCloseButton={true}
+      >
+        <p className="text-white">這關暫時鎖定，先找其他隊伍交換情報吧。</p>
+        <p className="text-[#FBBF24] font-bold mt-2">剩餘時間：{formatCooldownTime(remainingMs)}</p>
       </Modal>
 
     </div>

@@ -93,7 +93,7 @@ function SlotDropArea({ index, slot, activeOverId, onQuickReturn }) {
   );
 }
 
-export default function DragDropContainer({ items, slotsCount = 4, onComplete }) {
+export default function DragDropContainer({ items, slotsCount = 4, onComplete, onChange }) {
   const [availableItems, setAvailableItems] = useState(items);
   const [slots, setSlots] = useState(Array(slotsCount).fill(null));
   const [activePayload, setActivePayload] = useState(null);
@@ -109,6 +109,12 @@ export default function DragDropContainer({ items, slotsCount = 4, onComplete })
     setAvailableItems(items);
     setSlots(Array(slotsCount).fill(null));
   }, [items, slotsCount]);
+
+  useEffect(() => {
+    if (onChange) {
+      onChange(slots);
+    }
+  }, [onChange, slots]);
 
   const placeIntoSlot = (payload, targetIndex) => {
     if (!payload) return;

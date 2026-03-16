@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import NumericKeypad from '../components/NumericKeypad';
 import Modal from '../components/Modal';
 import { ingredientImages } from '../assets';
+import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 
 export default function Level2SafeLock() {
   const navigate = useNavigate();
   const [passcode, setPasscode] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const { isCoolingDown, remainingMs, triggerCooldown } = useLevelCooldown('level2');
 
   const handleKeyPress = (key) => {
     if (passcode.length < 4) {
@@ -21,11 +23,14 @@ export default function Level2SafeLock() {
   };
 
   const handleSubmit = () => {
+    if (isCoolingDown) return;
+
     // For demo, any 4 digits work, or specifically "1234"
     if (passcode.length === 4) {
       if (passcode === '1234') {
         setShowSuccess(true);
       } else {
+        triggerCooldown();
         setShowError(true);
         setPasscode(''); // Reset on fail
       }
@@ -69,7 +74,7 @@ export default function Level2SafeLock() {
 
       {/* Success Modal */}
       <Modal 
-        isOpen={showSuccess} 
+        isOpen={showSuccess && !isCoolingDown} 
         onClose={() => navigate('/dashboard')}
         title="保險箱已解開"
         type="success"
@@ -88,12 +93,24 @@ export default function Level2SafeLock() {
       {/* Error Modal */}
       <Modal 
         isOpen={showError} 
-        onClose={() => setShowError(false)}
-        title="密碼錯誤"
+        onClose={() => { setShowError(false); navigate('/dashboard'); }}
+        title="密碼錯誤，進入冷卻"
         type="error"
         showCloseButton={true}
       >
-        <p className="text-white">這不是存放舞鞋的密碼！再去找找線索吧！</p>
+        <p className="text-white">這不是存放舞鞋的密碼！先去找找線索再回來。</p>
+        <p className="text-sm text-pink-200 mt-2">冷卻時間：{formatCooldownTime(remainingMs)}</p>
+      </Modal>
+
+      <Modal
+        isOpen={isCoolingDown && !showError}
+        onClose={() => navigate('/dashboard')}
+        title="關卡冷卻中"
+        type="warning"
+        showCloseButton={true}
+      >
+        <p className="text-white">這關目前不能重試，請先去其他地方探索。</p>
+        <p className="text-[#FBBF24] font-bold mt-2">剩餘時間：{formatCooldownTime(remainingMs)}</p>
       </Modal>
 
     </div>

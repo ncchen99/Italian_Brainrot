@@ -1,14 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Upload } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import Modal from '../components/Modal';
 import { characterAssets } from '../assets';
+import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 
 export default function Level6GorillaPhoto() {
   const navigate = useNavigate();
   const [photoUrl, setPhotoUrl] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const fileInputRef = useRef(null);
+  const { isCoolingDown, remainingMs, triggerCooldown } = useLevelCooldown('level6');
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -19,9 +22,15 @@ export default function Level6GorillaPhoto() {
   };
 
   const handleSubmit = () => {
+    if (isCoolingDown) return;
+
     if (photoUrl) {
       setShowSuccess(true);
+      return;
     }
+
+    triggerCooldown();
+    setShowError(true);
   };
 
   const currentLevelColor = "#8B5CF6";
@@ -65,24 +74,21 @@ export default function Level6GorillaPhoto() {
         </div>
 
         <button
-          onClick={photoUrl ? handleSubmit : () => fileInputRef.current.click()}
+          onClick={handleSubmit}
+          disabled={isCoolingDown}
           className={`w-full py-4 rounded-2xl font-bold shadow-lg text-white transition-all duration-300 active:scale-95 border-b-4 flex items-center justify-center gap-2
             ${photoUrl 
               ? 'bg-gradient-to-r from-[#8B5CF6] to-[#6d28d9] border-[#4c1d95] shadow-[0_0_20px_rgba(139,92,246,0.5)]' 
               : 'bg-gray-700 border-gray-900'}
           `}
         >
-          {photoUrl ? (
-            <>送出認證！ ✅</>
-          ) : (
-            <><Upload size={20} /> 上傳照片</>
-          )}
+          送出認證！ ✅
         </button>
 
       </div>
 
       <Modal 
-        isOpen={showSuccess} 
+        isOpen={showSuccess && !isCoolingDown} 
         onClose={() => navigate('/dashboard')}
         title="認證成功"
         type="success"
@@ -98,6 +104,28 @@ export default function Level6GorillaPhoto() {
              </p>
            </div>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={showError}
+        onClose={() => { setShowError(false); navigate('/dashboard'); }}
+        title="認證失敗，進入冷卻"
+        type="error"
+        showCloseButton={true}
+      >
+        <p className="text-white">尚未上傳有效照片，咚咚咚認為你們還沒準備好。</p>
+        <p className="text-sm text-pink-200 mt-2">冷卻時間：{formatCooldownTime(remainingMs)}</p>
+      </Modal>
+
+      <Modal
+        isOpen={isCoolingDown && !showError}
+        onClose={() => navigate('/dashboard')}
+        title="關卡冷卻中"
+        type="warning"
+        showCloseButton={true}
+      >
+        <p className="text-white">此關暫時鎖定，請先去其他關卡完成任務。</p>
+        <p className="text-[#FBBF24] font-bold mt-2">剩餘時間：{formatCooldownTime(remainingMs)}</p>
       </Modal>
 
     </div>

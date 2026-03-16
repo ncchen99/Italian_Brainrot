@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import DragDropContainer from '../components/DragDropContainer';
 import Modal from '../components/Modal';
 import { ingredientImages } from '../assets';
+import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 
 export default function Level4WaterBalloonSort() {
   const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [slots, setSlots] = useState([]);
+  const { isCoolingDown, remainingMs, triggerCooldown } = useLevelCooldown('level4');
 
   // Available water balloons
   const items = [
@@ -17,7 +20,12 @@ export default function Level4WaterBalloonSort() {
     { id: 'green', content: '🟢', color: '#22C55E' }
   ];
 
-  const handleComplete = (slots) => {
+  const handleSubmit = () => {
+    if (isCoolingDown) return;
+
+    const allFilled = slots.length === 4 && slots.every((slot) => slot !== null);
+    if (!allFilled) return;
+
     // 答案邏輯推導：綠 > 藍 > 黃 > 紅
     const correctSequence = ['green', 'blue', 'yellow', 'red'];
     const currentSequence = slots.map(slot => slot?.id);
@@ -33,6 +41,7 @@ export default function Level4WaterBalloonSort() {
     if (isCorrect) {
       setTimeout(() => setShowSuccess(true), 500);
     } else {
+      triggerCooldown();
       setTimeout(() => setShowError(true), 500);
     }
   };
@@ -57,11 +66,13 @@ export default function Level4WaterBalloonSort() {
         <DragDropContainer 
           items={items} 
           slotsCount={4} 
+          onChange={setSlots}
         />
         
         <div className="mt-8 flex justify-center">
           <button
-            onClick={() => handleComplete([items[3], items[1], items[2], items[0]])} // Bypass logic for demo
+            onClick={handleSubmit}
+            disabled={isCoolingDown}
             className="px-8 py-3 rounded-2xl bg-gradient-to-r from-[#38BDF8] to-[#0284c7] border-b-4 border-[#0369a1] active:border-b-0 active:translate-y-1 font-bold shadow-lg text-white"
           >
             送出答案避開炸彈！ 🛡️
@@ -70,7 +81,7 @@ export default function Level4WaterBalloonSort() {
       </div>
 
       <Modal 
-        isOpen={showSuccess} 
+        isOpen={showSuccess && !isCoolingDown} 
         onClose={() => navigate('/dashboard')}
         title="邏輯滿分"
         type="success"
@@ -88,16 +99,27 @@ export default function Level4WaterBalloonSort() {
 
       <Modal 
         isOpen={showError} 
-        onClose={() => setShowError(false)}
-        title="被水球砸中了"
+        onClose={() => { setShowError(false); navigate('/dashboard'); }}
+        title="被水球砸中，進入冷卻"
         type="error"
         showCloseButton={true}
       >
         <div className="text-center">
           <p className="text-6xl mb-4">💦</p>
           <p className="text-white">順序不對！轟炸鱷鱷嘲笑著對你丟了一顆巨大水球！</p>
-          <p className="text-sm text-gray-400 mt-2">重新討論一下三個條件吧！</p>
+          <p className="text-sm text-pink-200 mt-2">冷卻時間：{formatCooldownTime(remainingMs)}</p>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={isCoolingDown && !showError}
+        onClose={() => navigate('/dashboard')}
+        title="關卡冷卻中"
+        type="warning"
+        showCloseButton={true}
+      >
+        <p className="text-white">此關暫時不能重試，先去幫其他角色解謎吧。</p>
+        <p className="text-[#FBBF24] font-bold mt-2">剩餘時間：{formatCooldownTime(remainingMs)}</p>
       </Modal>
 
     </div>

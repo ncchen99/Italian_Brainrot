@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CountdownTimer from '../components/CountdownTimer';
 import Modal from '../components/Modal';
 import { ingredientImages, characterAssets, sfx } from '../assets';
+import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 
 export default function Level3TapChallenge() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function Level3TapChallenge() {
   const [gameStatus, setGameStatus] = useState('ready'); // 'ready', 'playing', 'won', 'lost'
   const inflateAudioRef = useRef(null);
   const popAudioRef = useRef(null);
+  const { isCoolingDown, remainingMs, triggerCooldown } = useLevelCooldown('level3');
   
   const targetTaps = 50;
   const currentLevelColor = "#4ADE80";
@@ -29,6 +31,8 @@ export default function Level3TapChallenge() {
   }, [gameStatus]);
 
   const handleTap = () => {
+    if (isCoolingDown) return;
+
     if (gameStatus === 'ready') {
       setGameStatus('playing');
     }
@@ -48,11 +52,15 @@ export default function Level3TapChallenge() {
     }
   };
 
-  const handleTimeUp = () => {
-    if (gameStatus === 'playing') {
-      setGameStatus('lost');
-    }
-  };
+  const handleTimeUp = useCallback(() => {
+    setGameStatus(prevStatus => {
+      if (prevStatus === 'playing') {
+        triggerCooldown();
+        return 'lost';
+      }
+      return prevStatus;
+    });
+  }, [triggerCooldown]);
 
   const progressPercentage = Math.min((taps / targetTaps) * 100, 100);
 
@@ -108,7 +116,7 @@ export default function Level3TapChallenge() {
       </div>
 
       <Modal 
-        isOpen={gameStatus === 'won'} 
+        isOpen={gameStatus === 'won' && !isCoolingDown} 
         onClose={() => navigate('/dashboard')}
         title="挑戰成功"
         type="success"
@@ -126,16 +134,27 @@ export default function Level3TapChallenge() {
 
       <Modal 
         isOpen={gameStatus === 'lost'} 
-        onClose={() => { setGameStatus('ready'); setTaps(0); }}
-        title="手速太慢了"
+        onClose={() => { setGameStatus('ready'); setTaps(0); navigate('/dashboard'); }}
+        title="手速太慢，進入冷卻"
         type="error"
         showCloseButton={true}
       >
         <div className="text-center">
           <p className="text-6xl mb-4">😮‍💨</p>
           <p className="text-white">青蛙還在帽子裡叫，帕塔平大破防！</p>
-          <p className="text-sm text-gray-400 mt-2">請再試一次，讓大家都來幫忙點！</p>
+          <p className="text-sm text-pink-200 mt-2">冷卻時間：{formatCooldownTime(remainingMs)}</p>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={isCoolingDown && gameStatus !== 'lost'}
+        onClose={() => navigate('/dashboard')}
+        title="關卡冷卻中"
+        type="warning"
+        showCloseButton={true}
+      >
+        <p className="text-white">這關剛挑戰失敗，先去別關幫忙收集素材吧。</p>
+        <p className="text-[#FBBF24] font-bold mt-2">剩餘時間：{formatCooldownTime(remainingMs)}</p>
       </Modal>
 
     </div>
