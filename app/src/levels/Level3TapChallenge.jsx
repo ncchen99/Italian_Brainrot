@@ -119,7 +119,7 @@ export default function Level3TapChallenge() {
           </div>
           <p className="text-white font-bold mb-2">獲得：純淨山泉水！</p>
           <div className="bg-[#166534] text-green-100 p-3 rounded-xl border border-green-500 text-sm w-full">
-            💡 線索：「麵粉加水可以變成生麵團，準備去合成器試試看！」
+            💡 線索：「先把五種材料都收齊，回到合成器一起加工！」
           </div>
         </div>
       </Modal>

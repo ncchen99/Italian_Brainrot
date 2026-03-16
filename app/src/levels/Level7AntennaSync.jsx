@@ -98,7 +98,7 @@ export default function Level7AntennaSync() {
           </div>
           <p className="text-white font-bold mb-2">啦啦鯊成功揍扁了魔王！</p>
           <div className="bg-[#166534] text-green-100 p-3 rounded-xl border border-green-500 text-sm w-full font-bold">
-            獲得完整 Wi-Fi 權限！<br/>快前往這一切的終點「合成器」！
+            獲得完整 Wi-Fi 權限！<br/>快前往「合成協作站」完成材料加工！
           </div>
         </div>
       </Modal>

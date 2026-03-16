@@ -8,18 +8,19 @@ export default function SynthesisRoom() {
   const navigate = useNavigate();
   const [showEnding, setShowEnding] = useState(false);
 
-  // All collected items ready for synthesis
+  // Five collected materials ready for synthesis
   const collectedItems = [
-    { id: 'flour_water', imageSrc: ingredientImages.premiumFlour, label: 'Dough', color: '#FBBF24' },
+    { id: 'flour', imageSrc: ingredientImages.premiumFlour, label: 'Flour', color: '#FBBF24' },
+    { id: 'water', imageSrc: ingredientImages.pureSpringWater, label: 'Water', color: '#38BDF8' },
     { id: 'tomato', imageSrc: ingredientImages.holyTomato, label: 'Tomato', color: '#EF4444' },
     { id: 'cheese', imageSrc: ingredientImages.richParmesanCheese, label: 'Cheese', color: '#FBBF24' },
     { id: 'basil', imageSrc: ingredientImages.magicBasilLeaf, label: 'Basil', color: '#4ADE80' }
   ];
 
   const handleSynthesis = (slots) => {
-    // Check if slots are mostly filled for demo
+    // All 5 materials are required.
     const filledCount = slots.filter(s => s !== null).length;
-    if (filledCount === 4) {
+    if (filledCount === 5) {
       setTimeout(() => setShowEnding(true), 1500);
     }
   };
@@ -33,9 +34,9 @@ export default function SynthesisRoom() {
 
       <div className="relative z-10 w-full pt-12 pb-6 px-4 flex flex-col items-center">
          <h1 className="text-3xl font-bold text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#4ADE80] to-[#38BDF8] drop-shadow-md">
-           終極合成舞台
+           合成協作站
          </h1>
-         <p className="text-gray-400 text-sm text-center mb-8">將所有收集到的食材依序丟入神聖烤盤中！</p>
+         <p className="text-gray-400 text-sm text-center mb-8">集齊五種食材後，將它們放入合成器進行中繼加工！</p>
       </div>
 
       <div className="flex-1 w-full max-w-sm mx-auto px-4 flex flex-col relative z-10">
@@ -51,7 +52,7 @@ export default function SynthesisRoom() {
           <div className="w-full">
             <DragDropContainer 
               items={collectedItems}
-              slotsCount={4}
+              slotsCount={5}
               onComplete={handleSynthesis}
             />
           </div>
@@ -63,7 +64,7 @@ export default function SynthesisRoom() {
       <Modal 
         isOpen={showEnding} 
         onClose={() => navigate('/victory')}
-        title="✨ 究極進化！"
+        title="✨ 合成完成！"
         type="info"
         showCloseButton={false}
       >
@@ -72,13 +73,13 @@ export default function SynthesisRoom() {
             <img src={uiImages.ultimatePizza} alt="終極瑪格麗特披薩" className="w-full h-full object-contain" />
           </div>
           <p className="text-xl text-white font-bold mb-2 tracking-widest text-[#FBBF24]">終極瑪格麗特披薩</p>
-          <p className="text-sm text-gray-300 mb-8">散發著迷人香氣的傳奇披薩誕生了！</p>
+          <p className="text-sm text-gray-300 mb-8">五種食材已完成加工，下一步可以前往最終挑戰！</p>
           
           <button 
              onClick={() => navigate('/victory')}
              className="w-full px-6 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-[#4ADE80] to-[#16a34a] border-b-4 border-[#14532d] active:border-b-0 active:translate-y-1 shadow-lg"
           >
-             獻給提拉米蘇大師！
+             前往下一階段
           </button>
         </div>
       </Modal>

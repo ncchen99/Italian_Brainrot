@@ -30,7 +30,7 @@ export const SCAN_CODE_LIST = [
   { stage: 'Level 5', character: 'Lirili Larila', code: 'IBR-2026-L5-LIRI-7H3P', route: '/intro/level5' },
   { stage: 'Level 6', character: 'Tung Tung Tung Sahur', code: 'IBR-2026-L6-TUNG-5C8W', route: '/intro/level6' },
   { stage: 'Level 7', character: 'Tralalero Tralala', code: 'IBR-2026-L7-TRAL-1J9F', route: '/intro/level7' },
-  { stage: 'Synthesis', character: 'Ultimate Synthesizer', code: 'IBR-2026-L8-SYNT-3T4Y', route: '/synthesis' },
+  { stage: 'Synthesis', character: 'Synthesis Station', code: 'IBR-2026-L8-SYNT-3T4Y', route: '/synthesis' },
 ];
 
 export function getRouteByScanCode(rawCode) {

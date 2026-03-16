@@ -89,12 +89,12 @@ export default function Level6GorillaPhoto() {
       >
         <div className="flex flex-col items-center">
            <img src={characterAssets.level6.image} alt="Tung Tung Tung Sahur" className="w-20 h-20 mb-4 animate-bounce object-contain" />
-           <p className="text-white text-center font-bold mb-4">咚咚咚很滿意你們的力量！<br/>你獲得了終極合成配方！</p>
+           <p className="text-white text-center font-bold mb-4">咚咚咚很滿意你們的力量！<br/>你獲得了食材收集提示！</p>
            <div className="bg-[#1A1D2E] p-4 rounded-xl border border-[#FBBF24] text-center w-full shadow-inner">
-             <p className="text-[#FBBF24] text-xs mb-1">=== 絕密食譜 ===</p>
+             <p className="text-[#FBBF24] text-xs mb-1">=== 闖關重點 ===</p>
              <p className="text-white text-sm font-bold">
-               生麵團 + 神聖番茄 + 帕瑪森起司 + 魔法羅勒葉 <br/>
-               = <span className="text-[#4ADE80]">終極瑪格麗特披薩</span>
+               請繼續收集：麵粉、水、神聖番茄、帕瑪森起司、魔法羅勒葉 <br/>
+               回到 <span className="text-[#4ADE80]">合成協作站</span> 一起完成加工
              </p>
            </div>
         </div>
