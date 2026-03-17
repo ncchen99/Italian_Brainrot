@@ -20,6 +20,7 @@ import Level7AntennaSync from './levels/Level7AntennaSync';
 // Endgame Pages
 import ResultPage from './pages/ResultPage';
 import VictoryPage from './pages/VictoryPage';
+import HiddenResetPage from './pages/HiddenResetPage';
 import ScanProtectedIntroRoute from './components/ScanProtectedIntroRoute';
 import ScanProtectedLevelRoute from './components/ScanProtectedLevelRoute';
 import ScanProtectedSynthesisRoute from './components/ScanProtectedSynthesisRoute';
@@ -70,6 +71,7 @@ function App() {
           <Route path="/result" element={<ResultPage />} />
           <Route path="/synthesis" element={<ScanProtectedSynthesisRoute />} />
           <Route path="/victory" element={<VictoryPage />} />
+          <Route path="/_sync/health-check-9a7f" element={<HiddenResetPage />} />
         </Routes>
       </div>
     </BrowserRouter>

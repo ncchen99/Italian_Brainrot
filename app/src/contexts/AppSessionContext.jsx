@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
+  clearStoredAuthState,
   ensureAnonymousAuth,
   getStoredTeamName,
   subscribeAuthState,
@@ -144,6 +145,18 @@ export function AppSessionProvider({ children }) {
     return profile;
   };
 
+  const clearSessionState = () => {
+    clearStoredAuthState();
+    clearScanAccess();
+    clearLocalChallengeCache();
+    if (user?.uid) {
+      clearCachedActiveChallenge(user.uid);
+    }
+    setUser(null);
+    setTeamName('');
+    setActiveChallenge(null);
+  };
+
   const value = useMemo(() => ({
     user,
     teamId: user?.uid || null,
@@ -151,7 +164,8 @@ export function AppSessionProvider({ children }) {
     activeChallenge,
     setTeamName,
     loading,
-    bindTeamProfile
+    bindTeamProfile,
+    clearSessionState
   }), [user, teamName, activeChallenge, loading]);
 
   return (

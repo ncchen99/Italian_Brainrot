@@ -22,6 +22,11 @@ export function setStoredTeamName(teamName) {
   window.localStorage.setItem(TEAM_NAME_KEY, teamName.trim());
 }
 
+export function clearStoredAuthState() {
+  window.localStorage.removeItem(LOCAL_AUTH_KEY);
+  window.localStorage.removeItem(TEAM_NAME_KEY);
+}
+
 export function subscribeAuthState(callback) {
   if (!isFirebaseEnabled || !auth) {
     const uid = getOrCreateLocalUid();
