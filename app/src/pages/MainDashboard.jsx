@@ -9,7 +9,7 @@ import { getRouteByScanCode } from '../scanCodes';
 import { useAppSession } from '../contexts/AppSessionContext';
 import { requestAppFullscreen, isFullscreenActive } from '../services/fullscreenService';
 import { grantScanAccess } from '../services/scanAccessService';
-import { getSessionProgress, markRecentScan } from '../services/progressService';
+import { markRecentScan, subscribeSessionProgress } from '../services/progressService';
 
 const INGREDIENTS_META = [
   { id: 'i1', levelId: 'level1', iconSrc: ingredientImages.flour, title: '陳年特級麵粉', description: '一袋散發著金光的特級麵粉，是披薩的靈魂基礎。', imageSrc: ingredientImages.premiumFlour, activeColor: '#FBBF24', collectedOrder: 1 },
@@ -40,28 +40,23 @@ export default function MainDashboard() {
   const [progressMap, setProgressMap] = useState({});
 
   useEffect(() => {
-    let alive = true;
     if (!teamId || !activeChallenge?.id) {
       setProgressMap({});
-      return () => {
-        alive = false;
-      };
+      return () => {};
     }
 
-    getSessionProgress({
+    const unsubscribe = subscribeSessionProgress({
       teamId,
-      sessionId: activeChallenge.id
-    }).then((result) => {
-      if (!alive) return;
-      setProgressMap(result);
-    }).catch(() => {
-      if (!alive) return;
-      setProgressMap({});
+      sessionId: activeChallenge.id,
+      onChange: (result) => {
+        setProgressMap(result);
+      },
+      onError: () => {
+        setProgressMap({});
+      }
     });
 
-    return () => {
-      alive = false;
-    };
+    return unsubscribe;
   }, [teamId, activeChallenge?.id]);
 
   const targetIngredients = useMemo(

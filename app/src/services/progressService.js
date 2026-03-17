@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, isFirebaseEnabled } from '../lib/firebase';
 
 const COOLDOWN_CACHE_PREFIX = 'ibr-cooldown';
@@ -192,6 +192,41 @@ export async function getSessionProgress({ teamId, sessionId }) {
   });
 
   return progressMap;
+}
+
+export function subscribeSessionProgress({
+  teamId,
+  sessionId,
+  onChange,
+  onError
+}) {
+  if (!teamId || !sessionId || typeof onChange !== 'function') {
+    return () => {};
+  }
+
+  if (!isFirebaseEnabled || !db) {
+    onChange({});
+    return () => {};
+  }
+
+  const progressCol = collection(db, 'teams', teamId, 'challengeSessions', sessionId, 'progress');
+  const unsubscribe = onSnapshot(
+    progressCol,
+    (snapshot) => {
+      const progressMap = {};
+      snapshot.forEach((item) => {
+        progressMap[item.id] = item.data() || {};
+      });
+      onChange(progressMap);
+    },
+    (error) => {
+      if (typeof onError === 'function') {
+        onError(error);
+      }
+    }
+  );
+
+  return unsubscribe;
 }
 
 export async function setLevelCooldown({
