@@ -137,8 +137,9 @@ export default function MainDashboard() {
     [firstUnfinishedLevelId, isSynthesisUnlocked, levelProgressMap]
   );
   const displayTeamName = teamName || '未命名小隊';
-  const challengeRemainingSeconds = activeChallenge?.endsAtMs
-    ? Math.max(0, Math.ceil((activeChallenge.endsAtMs - Date.now()) / 1000))
+  const challengeEndsAtMs = Number(activeChallenge?.endsAtMs);
+  const challengeRemainingSeconds = Number.isFinite(challengeEndsAtMs)
+    ? Math.ceil((challengeEndsAtMs - Date.now()) / 1000)
     : null;
 
   const handleScanClick = () => {
@@ -191,11 +192,15 @@ export default function MainDashboard() {
             <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 font-bold font-mono text-xl tracking-wider bg-[#1A1D2E] border-[#7C5CFC]/50 text-white">
               --:--
             </div>
+          ) : challengeRemainingSeconds <= 0 ? (
+            <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 font-bold text-sm bg-[#1A1D2E] border-[#7C5CFC]/50 text-white">
+              剩下 0 分鐘
+            </div>
           ) : (
             <CountdownTimer
               key={`${activeChallenge?.id || 'nosession'}-${challengeRemainingSeconds}`}
               initialSeconds={challengeRemainingSeconds}
-              isRunning={challengeRemainingSeconds > 0}
+              isRunning
             />
           )}
         </div>
