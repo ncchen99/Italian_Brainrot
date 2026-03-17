@@ -10,6 +10,56 @@ import { clearScanAccess } from '../services/scanAccessService';
 import { clearLocalChallengeCache, getActiveChallengeSession, startChallengeSession } from '../services/progressService';
 
 const AppSessionContext = createContext(null);
+const ACTIVE_CHALLENGE_CACHE_PREFIX = 'ibr-active-challenge';
+
+function getActiveChallengeCacheKey(teamId) {
+  return `${ACTIVE_CHALLENGE_CACHE_PREFIX}:${teamId}`;
+}
+
+function readCachedActiveChallenge(teamId) {
+  if (!teamId) return null;
+  try {
+    const raw = window.localStorage.getItem(getActiveChallengeCacheKey(teamId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const endsAtMs = Number(parsed?.endsAtMs);
+    const startedAtMs = Number(parsed?.startedAtMs);
+    if (!parsed?.id || !Number.isFinite(endsAtMs) || !Number.isFinite(startedAtMs)) {
+      return null;
+    }
+    if (endsAtMs <= Date.now()) return null;
+    return {
+      id: String(parsed.id),
+      teamId,
+      startedAtMs,
+      endsAtMs
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedActiveChallenge(teamId, session) {
+  if (!teamId || !session?.id) return;
+  const endsAtMs = Number(session.endsAtMs);
+  const startedAtMs = Number(session.startedAtMs);
+  if (!Number.isFinite(endsAtMs) || !Number.isFinite(startedAtMs)) return;
+  if (endsAtMs <= Date.now()) return;
+
+  window.localStorage.setItem(
+    getActiveChallengeCacheKey(teamId),
+    JSON.stringify({
+      id: String(session.id),
+      startedAtMs,
+      endsAtMs
+    })
+  );
+}
+
+function clearCachedActiveChallenge(teamId) {
+  if (!teamId) return;
+  window.localStorage.removeItem(getActiveChallengeCacheKey(teamId));
+}
 
 export function AppSessionProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -34,14 +84,28 @@ export function AppSessionProvider({ children }) {
       };
     }
 
+    const cached = readCachedActiveChallenge(user.uid);
+    if (cached) {
+      setActiveChallenge(cached);
+    }
+
     getActiveChallengeSession({ teamId: user.uid })
       .then((session) => {
         if (!alive) return;
-        setActiveChallenge(session);
+        const isValid = Boolean(session?.id && Number(session?.endsAtMs) > Date.now());
+        if (isValid) {
+          setActiveChallenge(session);
+          writeCachedActiveChallenge(user.uid, session);
+          return;
+        }
+        setActiveChallenge(null);
+        clearCachedActiveChallenge(user.uid);
       })
       .catch(() => {
         if (!alive) return;
-        setActiveChallenge(null);
+        if (!cached) {
+          setActiveChallenge(null);
+        }
       });
 
     return () => {
@@ -69,6 +133,11 @@ export function AppSessionProvider({ children }) {
           teamId: authUser.uid,
           teamName: profile.teamName
         });
+    if (session?.id && Number(session?.endsAtMs) > Date.now()) {
+      writeCachedActiveChallenge(authUser.uid, session);
+    } else {
+      clearCachedActiveChallenge(authUser.uid);
+    }
     setUser(authUser);
     setTeamName(profile.teamName);
     setActiveChallenge(session);
