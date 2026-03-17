@@ -45,20 +45,30 @@ export async function saveLevelProgress({
     }
   }
 
-  const progressRef = resolvedSessionId
-    ? doc(db, 'teams', teamId, 'challengeSessions', resolvedSessionId, 'progress', levelId)
-    : doc(db, 'teams', teamId, 'progress', levelId);
-  await setDoc(
-    progressRef,
-    {
-      sessionId: resolvedSessionId || null,
-      levelId,
-      status,
-      updatedAt: serverTimestamp(),
-      ...payload
-    },
-    { merge: true }
-  );
+  const progressPayload = {
+    sessionId: resolvedSessionId || null,
+    levelId,
+    status,
+    updatedAt: serverTimestamp(),
+    ...payload
+  };
+
+  const rootProgressRef = doc(db, 'teams', teamId, 'progress', levelId);
+  const writeTasks = [
+    setDoc(rootProgressRef, progressPayload, { merge: true })
+  ];
+
+  if (resolvedSessionId) {
+    const sessionProgressRef = doc(db, 'teams', teamId, 'challengeSessions', resolvedSessionId, 'progress', levelId);
+    writeTasks.push(setDoc(sessionProgressRef, progressPayload, { merge: true }));
+  }
+
+  const results = await Promise.allSettled(writeTasks);
+  const hasSuccess = results.some((result) => result.status === 'fulfilled');
+  if (!hasSuccess) {
+    const firstRejected = results.find((result) => result.status === 'rejected');
+    throw firstRejected?.reason || new Error('saveLevelProgress failed');
+  }
 }
 
 export async function saveUploadRecord({
@@ -218,6 +228,40 @@ export function subscribeSessionProgress({
   }
 
   const progressCol = collection(db, 'teams', teamId, 'challengeSessions', sessionId, 'progress');
+  const unsubscribe = onSnapshot(
+    progressCol,
+    (snapshot) => {
+      const progressMap = {};
+      snapshot.forEach((item) => {
+        progressMap[item.id] = item.data() || {};
+      });
+      onChange(progressMap);
+    },
+    (error) => {
+      if (typeof onError === 'function') {
+        onError(error);
+      }
+    }
+  );
+
+  return unsubscribe;
+}
+
+export function subscribeTeamProgress({
+  teamId,
+  onChange,
+  onError
+}) {
+  if (!teamId || typeof onChange !== 'function') {
+    return () => {};
+  }
+
+  if (!isFirebaseEnabled || !db) {
+    onChange({});
+    return () => {};
+  }
+
+  const progressCol = collection(db, 'teams', teamId, 'progress');
   const unsubscribe = onSnapshot(
     progressCol,
     (snapshot) => {

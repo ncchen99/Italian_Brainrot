@@ -105,7 +105,7 @@ export default function QRCodeScannerModal({ isOpen, onClose, onScan }) {
         .stop()
         .catch(() => {})
         .finally(() => {
-          activeScanner.clear().catch(() => {});
+          Promise.resolve(activeScanner.clear()).catch(() => {});
         });
     };
   }, [isOpen, onScan, scannerId]);

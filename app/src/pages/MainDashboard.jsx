@@ -9,7 +9,7 @@ import { getRouteByScanCode } from '../scanCodes';
 import { useAppSession } from '../contexts/AppSessionContext';
 import { requestAppFullscreen, isFullscreenActive } from '../services/fullscreenService';
 import { grantScanAccess } from '../services/scanAccessService';
-import { markRecentScan, subscribeSessionProgress } from '../services/progressService';
+import { markRecentScan, subscribeSessionProgress, subscribeTeamProgress } from '../services/progressService';
 
 const INGREDIENTS_META = [
   { id: 'i1', levelId: 'level1', iconSrc: ingredientImages.flour, title: '陳年特級麵粉', description: '一袋散發著金光的特級麵粉，是披薩的靈魂基礎。', imageSrc: ingredientImages.premiumFlour, activeColor: '#FBBF24', collectedOrder: 1 },
@@ -40,23 +40,50 @@ export default function MainDashboard() {
   const [progressMap, setProgressMap] = useState({});
 
   useEffect(() => {
-    if (!teamId || !activeChallenge?.id) {
+    if (!teamId) {
       setProgressMap({});
       return () => {};
     }
 
-    const unsubscribe = subscribeSessionProgress({
+    let teamProgressMap = {};
+    let sessionProgressMap = {};
+    const mergeAndSet = () => {
+      setProgressMap({ ...teamProgressMap, ...sessionProgressMap });
+    };
+
+    const unsubscribeTeam = subscribeTeamProgress({
       teamId,
-      sessionId: activeChallenge.id,
       onChange: (result) => {
-        setProgressMap(result);
+        teamProgressMap = result || {};
+        mergeAndSet();
       },
       onError: () => {
-        setProgressMap({});
+        teamProgressMap = {};
+        mergeAndSet();
       }
     });
 
-    return unsubscribe;
+    if (!activeChallenge?.id) {
+      return unsubscribeTeam;
+    }
+
+    const unsubscribeSession = subscribeSessionProgress({
+      teamId,
+      sessionId: activeChallenge.id,
+      onChange: (result) => {
+        sessionProgressMap = result || {};
+        mergeAndSet();
+      },
+      onError: () => {
+        sessionProgressMap = {};
+        mergeAndSet();
+      }
+    });
+
+    return () => {
+      unsubscribeSession();
+      unsubscribeTeam();
+    };
   }, [teamId, activeChallenge?.id]);
 
   const targetIngredients = useMemo(
