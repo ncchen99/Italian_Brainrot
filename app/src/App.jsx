@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAppSession } from './contexts/AppSessionContext';
 
 // Pages
 import LoginPage from './pages/LoginPage';
@@ -23,13 +24,39 @@ import ScanProtectedIntroRoute from './components/ScanProtectedIntroRoute';
 import ScanProtectedLevelRoute from './components/ScanProtectedLevelRoute';
 import ScanProtectedSynthesisRoute from './components/ScanProtectedSynthesisRoute';
 
+function RootRedirectRoute() {
+  const { loading, teamId, teamName } = useAppSession();
+
+  if (loading) {
+    return null;
+  }
+
+  const hasLoginState = Boolean(teamId && teamName?.trim());
+  return <Navigate to={hasLoginState ? '/dashboard' : '/login'} replace />;
+}
+
+function LoginRoute() {
+  const { loading, teamId, teamName } = useAppSession();
+
+  if (loading) {
+    return null;
+  }
+
+  const hasLoginState = Boolean(teamId && teamName?.trim());
+  if (hasLoginState) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <LoginPage />;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <div className="w-full min-h-screen bg-[#0D0F1A] text-white relative mx-auto max-w-md shadow-2xl overflow-hidden">
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<RootRedirectRoute />} />
+          <Route path="/login" element={<LoginRoute />} />
           <Route path="/dashboard" element={<MainDashboard />} />
           <Route path="/intro/:characterId" element={<ScanProtectedIntroRoute />} />
           <Route path="/level/level1" element={<ScanProtectedLevelRoute levelId="level1" levelTitle="忍者的修煉" characterColor="#7C5CFC"><Level1NinjaSort /></ScanProtectedLevelRoute>} />

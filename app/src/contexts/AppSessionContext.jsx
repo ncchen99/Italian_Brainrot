@@ -55,12 +55,20 @@ export function AppSessionProvider({ children }) {
       uid: authUser.uid,
       teamName: inputTeamName
     });
-    clearScanAccess();
-    clearLocalChallengeCache();
-    const session = await startChallengeSession({
-      teamId: authUser.uid,
-      teamName: profile.teamName
-    });
+    const existingSession = await getActiveChallengeSession({ teamId: authUser.uid }).catch(() => null);
+    const hasActiveSession = Boolean(existingSession?.id && Number(existingSession?.endsAtMs) > Date.now());
+
+    if (!hasActiveSession) {
+      clearScanAccess();
+      clearLocalChallengeCache();
+    }
+
+    const session = hasActiveSession
+      ? existingSession
+      : await startChallengeSession({
+          teamId: authUser.uid,
+          teamName: profile.teamName
+        });
     setUser(authUser);
     setTeamName(profile.teamName);
     setActiveChallenge(session);
