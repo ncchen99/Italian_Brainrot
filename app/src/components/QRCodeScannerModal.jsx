@@ -2,6 +2,48 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import Modal from './Modal';
 
+async function waitForElementById(elementId, maxMs = 1500) {
+  const start = Date.now();
+  while (Date.now() - start <= maxMs) {
+    const element = document.getElementById(elementId);
+    if (element) return element;
+    await new Promise((resolve) => setTimeout(resolve, 30));
+  }
+  throw new Error('掃描區塊尚未建立，請再試一次。');
+}
+
+async function ensureCameraPermission() {
+  if (!window.isSecureContext) {
+    throw new Error('相機功能需要安全連線，請改用 HTTPS 或 localhost 開啟頁面。');
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error('目前瀏覽器不支援相機存取，請改用最新版 Chrome 或 Safari。');
+  }
+
+  try {
+    if (navigator.permissions?.query) {
+      const cameraPermission = await navigator.permissions.query({ name: 'camera' });
+      if (cameraPermission.state === 'denied') {
+        throw new Error('相機權限已被封鎖，請到瀏覽器設定將相機權限改為允許。');
+      }
+    }
+  } catch {
+    // Some browsers do not support camera permission query.
+  }
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }
+    });
+  } catch {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  } finally {
+    stream?.getTracks().forEach((track) => track.stop());
+  }
+}
+
 export default function QRCodeScannerModal({ isOpen, onClose, onScan }) {
   const scannerId = useId().replaceAll(':', '-');
   const scannerRef = useRef(null);
@@ -15,9 +57,6 @@ export default function QRCodeScannerModal({ isOpen, onClose, onScan }) {
     }
 
     let cancelled = false;
-    const scanner = new Html5Qrcode(scannerId, { verbose: false });
-    scannerRef.current = scanner;
-
     const onScanSuccess = (decodedText) => {
       if (handledRef.current) return;
       handledRef.current = true;
@@ -26,22 +65,31 @@ export default function QRCodeScannerModal({ isOpen, onClose, onScan }) {
 
     const startScanner = async () => {
       try {
-        await scanner.start(
-          { facingMode: { exact: 'environment' } },
-          { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1 },
-          onScanSuccess
-        );
-      } catch {
+        await waitForElementById(scannerId);
+        if (cancelled) return;
+
+        await ensureCameraPermission();
+        if (cancelled) return;
+
+        const scanner = new Html5Qrcode(scannerId, { verbose: false });
+        scannerRef.current = scanner;
+
         try {
+          await scanner.start(
+            { facingMode: { exact: 'environment' } },
+            { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1 },
+            onScanSuccess
+          );
+        } catch {
           await scanner.start(
             { facingMode: 'environment' },
             { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1 },
             onScanSuccess
           );
-        } catch (error) {
-          if (cancelled) return;
-          setErrorText(error?.message || '無法開啟相機，請確認相機權限。');
         }
+      } catch (error) {
+        if (cancelled) return;
+        setErrorText(error?.message || '無法開啟相機，請確認相機權限。');
       }
     };
 
