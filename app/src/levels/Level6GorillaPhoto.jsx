@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 import { characterAssets } from '../assets';
 import useLevelCooldown, { formatCooldownTime } from '../hooks/useLevelCooldown';
 import { useAppSession } from '../contexts/AppSessionContext';
+import { ensureAnonymousAuth } from '../services/authService';
 import { uploadImageToFirebaseStorage } from '../services/uploadService';
 import { saveLevelProgress, saveUploadRecord } from '../services/progressService';
 
@@ -50,21 +51,27 @@ export default function Level6GorillaPhoto() {
       setSubmitError('');
 
       try {
+        const authUser = await ensureAnonymousAuth();
+        const effectiveTeamId = teamId || authUser?.uid || null;
+        if (!effectiveTeamId) {
+          throw new Error('尚未取得登入身分，請稍後再試。');
+        }
+
         const uploadResult = await uploadImageToFirebaseStorage({
           file: photoFile,
-          teamId: teamId || 'unknown-team',
+          teamId: effectiveTeamId,
           levelId: 'level6'
         });
 
-        if (teamId) {
+        if (effectiveTeamId) {
           await saveUploadRecord({
-            teamId,
+            teamId: effectiveTeamId,
             levelId: 'level6',
             imageUrl: uploadResult.publicUrl,
             objectKey: uploadResult.objectKey
           });
           await saveLevelProgress({
-            teamId,
+            teamId: effectiveTeamId,
             levelId: 'level6',
             status: 'completed',
             payload: {
@@ -75,6 +82,11 @@ export default function Level6GorillaPhoto() {
 
         setUploadStatus('success');
       } catch (error) {
+        console.error('[level6] upload or progress save failed', {
+          code: error?.code,
+          message: error?.message,
+          teamId: teamId || null
+        });
         setUploadStatus('error');
         setSubmitError(error?.message || '圖片上傳失敗，請稍後再試。');
         return;

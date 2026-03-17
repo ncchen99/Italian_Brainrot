@@ -4,6 +4,7 @@ import { auth, db, isFirebaseEnabled } from '../lib/firebase';
 
 const LOCAL_AUTH_KEY = 'ibr-local-anon-uid';
 const TEAM_NAME_KEY = 'ibr-team-name';
+const AUTH_READY_TIMEOUT_MS = 5000;
 
 function getOrCreateLocalUid() {
   const existing = window.localStorage.getItem(LOCAL_AUTH_KEY);
@@ -36,6 +37,25 @@ export function subscribeAuthState(callback) {
   });
 }
 
+async function waitForAuthReady(timeoutMs = AUTH_READY_TIMEOUT_MS) {
+  if (!isFirebaseEnabled || !auth) return null;
+  if (auth.currentUser) return auth.currentUser;
+
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      unsubscribe();
+      reject(new Error('等待 Firebase 匿名登入狀態逾時'));
+    }, timeoutMs);
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      window.clearTimeout(timer);
+      unsubscribe();
+      resolve(user);
+    });
+  });
+}
+
 export async function ensureAnonymousAuth() {
   if (!isFirebaseEnabled || !auth) {
     return {
@@ -49,7 +69,14 @@ export async function ensureAnonymousAuth() {
   }
 
   const credential = await signInAnonymously(auth);
-  return credential.user;
+  // Ensure ID token is materialized before Firestore/Storage access.
+  await credential.user.getIdToken();
+
+  try {
+    return await waitForAuthReady();
+  } catch {
+    return credential.user;
+  }
 }
 
 export async function upsertTeamProfile({ uid, teamName }) {
@@ -64,19 +91,33 @@ export async function upsertTeamProfile({ uid, teamName }) {
     };
   }
 
-  const teamRef = doc(db, 'teams', uid);
-  await setDoc(
-    teamRef,
-    {
-      name: safeTeamName,
-      updatedAt: serverTimestamp(),
-      createdAt: serverTimestamp()
-    },
-    { merge: true }
-  );
+  const authUser = await waitForAuthReady().catch(() => auth?.currentUser || null);
+  const effectiveUid = authUser?.uid || uid;
+  const teamRef = doc(db, 'teams', effectiveUid);
+
+  try {
+    await setDoc(
+      teamRef,
+      {
+        name: safeTeamName,
+        updatedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error('[firebase] upsertTeamProfile failed', {
+      code: error?.code,
+      message: error?.message,
+      uid: effectiveUid,
+      authedUid: authUser?.uid || null,
+      projectId: db?.app?.options?.projectId || null
+    });
+    throw error;
+  }
 
   return {
-    teamId: uid,
+    teamId: effectiveUid,
     teamName: safeTeamName
   };
 }

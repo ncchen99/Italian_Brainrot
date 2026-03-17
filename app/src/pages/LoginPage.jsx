@@ -24,6 +24,10 @@ export default function LoginPage() {
       await requestAppFullscreen();
       navigate('/dashboard');
     } catch (error) {
+      console.error('[login] bindTeamProfile failed', {
+        code: error?.code,
+        message: error?.message
+      });
       setErrorText(error?.message || '登入失敗，請稍後再試。');
     } finally {
       setIsSubmitting(false);
