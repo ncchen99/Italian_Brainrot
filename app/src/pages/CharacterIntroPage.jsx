@@ -32,12 +32,12 @@ export default function CharacterIntroPage() {
     },
     'level5': {
       name: 'Lirili Larila',
-      text: '渴死我了，比沒有水更慘的是沒有 Wi-Fi。漢堡魔王在我的時間鬧鐘上鎖了『規律密碼』。你們那麼聰明，能幫我破解數列重啟鬧鐘嗎？',
+      text: '渴死我了，比沒有水更慘的是沒有 Wi-Fi。漢堡魔王在我的時間鬧鐘上鎖了『規律密碼』。你們能幫我破解數列重啟鬧鐘嗎？',
       color: '#FBBF24'
     },
     'level6': {
       name: 'Tung Tung Tung Sahur',
-      text: '咚！咚！咚！氣死我了，我要變身為木頭猩猩了！如果你們不能證明你們有足夠的力氣，我就一棒把你們打飛！',
+      text: '我也想變成木頭猩猩，一起對抗漢堡魔王，但是只有我自己力量不夠，你們可以跟我一起嗎？',
       color: '#8B5CF6'
     },
     'level7': {
@@ -49,6 +49,16 @@ export default function CharacterIntroPage() {
 
   const currentCharacter = characterData[characterId] || characterData['level1'];
   const currentCharacterAsset = characterAssets[characterId] || characterAssets.level1;
+  const introAudioByLevel = {
+    level1: new URL('../../../assets/intro_audio/Cappuccino Assassino.mp3', import.meta.url).href,
+    level2: new URL('../../../assets/intro_audio/Ballerina Cappuccina.mp3', import.meta.url).href,
+    level3: new URL('../../../assets/intro_audio/Brr Brr Patapim.mp3', import.meta.url).href,
+    level4: new URL('../../../assets/intro_audio/Bombardilo Crocodilo.mp3', import.meta.url).href,
+    level5: new URL('../../../assets/intro_audio/Lirili Larila.mp3', import.meta.url).href,
+    level6: new URL('../../../assets/intro_audio/Tung Tung Tung Sahur.mp3', import.meta.url).href,
+    level7: new URL('../../../assets/intro_audio/Tralalero Tralala.mp3', import.meta.url).href
+  };
+  const currentIntroAudio = introAudioByLevel[characterId] || introAudioByLevel.level1;
 
   const handleStartChallenge = () => {
     navigate(`/level/${characterId}`);
@@ -56,20 +66,20 @@ export default function CharacterIntroPage() {
 
   return (
     <div className="relative w-full min-h-screen flex flex-col items-center overflow-hidden bg-gradient-to-b from-[#0D0F1A] via-[#141B34] to-[#1B1140]">
-      
+
       {/* Background Decor */}
-      <div 
+      <div
         className="absolute top-0 left-0 w-full h-1/2 opacity-20 blur-3xl rounded-b-full transition-colors duration-1000"
         style={{ backgroundColor: currentCharacter.color }}
       ></div>
 
       <div className="relative z-10 w-full flex-1 flex flex-col justify-end pb-8">
-        
+
         {/* Character Image Placeholder */}
         <div className="flex-1 flex items-center justify-center p-8 animate-float">
-          <div 
+          <div
             className="w-full max-w-[280px] aspect-square rounded-[3rem] shadow-2xl flex items-center justify-center text-8xl transform -rotate-3 border-2 border-white/10"
-            style={{ 
+            style={{
               backgroundColor: currentCharacter.color,
               boxShadow: `0 20px 40px -10px ${currentCharacter.color}80`
             }}
@@ -80,11 +90,12 @@ export default function CharacterIntroPage() {
 
         {/* Dialog Panel Component */}
         <div className="px-2 w-full">
-          <DialogPanel 
+          <DialogPanel
             characterName={currentCharacter.name}
             dialogText={currentCharacter.text}
             avatarSrc={currentCharacterAsset.image}
             audioSrc={currentCharacterAsset.voice}
+            followupAudioSrc={currentIntroAudio}
             showAvatar={false}
             onComplete={() => setDialogFinished(true)}
             typingSpeed={40}
@@ -102,8 +113,8 @@ export default function CharacterIntroPage() {
               接受挑戰！
             </span>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => navigate('/dashboard')}
             className="w-full mt-4 py-3 text-gray-300 font-bold hover:text-[#FBBF24] transition-colors"
           >

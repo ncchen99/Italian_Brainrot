@@ -6,6 +6,7 @@ export default function DialogPanel({
   avatarSrc, 
   dialogText, 
   audioSrc, 
+  followupAudioSrc,
   typingSpeed = 50,
   showAvatar = true,
   onComplete 
@@ -14,71 +15,150 @@ export default function DialogPanel({
   const [isTyping, setIsTyping] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
+  const followupAudioRef = useRef(null);
+  const activeAudioRef = useRef(null);
+  const typingIntervalRef = useRef(null);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  const startTypewriter = () => {
+    if (!dialogText) {
+      setDisplayedText('');
+      setIsTyping(false);
+      return;
+    }
+
+    if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+
+    setDisplayedText(dialogText.charAt(0));
+    setIsTyping(true);
+
+    if (dialogText.length === 1) {
+      setIsTyping(false);
+      if (onCompleteRef.current) onCompleteRef.current();
+      return;
+    }
+
+    let currentIndex = 1;
+    typingIntervalRef.current = setInterval(() => {
+      if (currentIndex < dialogText.length) {
+        setDisplayedText(dialogText.slice(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        clearInterval(typingIntervalRef.current);
+        typingIntervalRef.current = null;
+        setIsTyping(false);
+        if (onCompleteRef.current) onCompleteRef.current();
+      }
+    }, typingSpeed);
+  };
+
+  const stopAllAudio = () => {
+    if (audioRef.current) audioRef.current.pause();
+    if (followupAudioRef.current) followupAudioRef.current.pause();
+    activeAudioRef.current = null;
+    setIsPlaying(false);
+  };
+
+  const playPrimaryAudio = () => {
+    if (!audioRef.current || !audioSrc) return Promise.resolve(false);
+    audioRef.current.currentTime = 0;
+    audioRef.current.volume = 0.5;
+    return audioRef.current.play()
+      .then(() => {
+        activeAudioRef.current = audioRef.current;
+        setIsPlaying(true);
+        return true;
+      })
+      .catch((e) => {
+        console.log('Primary audio autoplay blocked', e);
+        setIsPlaying(false);
+        return false;
+      });
+  };
+
+  const playFollowupAudio = () => {
+    if (!followupAudioRef.current || !followupAudioSrc) {
+      setIsPlaying(false);
+      return Promise.resolve(false);
+    }
+    followupAudioRef.current.currentTime = 0;
+    followupAudioRef.current.volume = 0.7;
+    return followupAudioRef.current.play()
+      .then(() => {
+        activeAudioRef.current = followupAudioRef.current;
+        setIsPlaying(true);
+        return true;
+      })
+      .catch((e) => {
+        console.log('Followup audio autoplay blocked', e);
+        setIsPlaying(false);
+        return false;
+      });
+  };
+
+  const playAudioSequence = () => {
+    stopAllAudio();
+    if (audioSrc) {
+      playPrimaryAudio();
+      return;
+    }
+    if (followupAudioSrc) {
+      playFollowupAudio();
+    }
+  };
 
   // Typewriter effect
   useEffect(() => {
-    if (!dialogText) return;
-    
-    setDisplayedText('');
-    setIsTyping(true);
-    
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (currentIndex < dialogText.length) {
-        setDisplayedText(prev => prev + dialogText.charAt(currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(interval);
-        setIsTyping(false);
-        if (onComplete) onComplete();
+    startTypewriter();
+    return () => {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+        typingIntervalRef.current = null;
       }
-    }, typingSpeed);
-
-    return () => clearInterval(interval);
+    };
   }, [dialogText, typingSpeed]);
 
-  // Handle audio play automatically on mount if src provided
+  // Play original voice first, then intro line.
   useEffect(() => {
-    if (audioSrc && audioRef.current) {
-      audioRef.current.volume = 0.5;
-      audioRef.current.play().catch(e => console.log('Audio autoplay blocked', e));
-      setIsPlaying(true);
+    if (audioSrc || followupAudioSrc) {
+      playAudioSequence();
     }
-  }, [audioSrc]);
+
+    return () => {
+      stopAllAudio();
+    };
+  }, [audioSrc, followupAudioSrc]);
 
   const toggleAudio = () => {
-    if (!audioRef.current) return;
+    if (!audioSrc && !followupAudioSrc) return;
+
     if (isPlaying) {
-      audioRef.current.pause();
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+      } else {
+        stopAllAudio();
+      }
+      setIsPlaying(false);
     } else {
-      audioRef.current.play();
+      if (activeAudioRef.current) {
+        activeAudioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(() => {
+          setIsPlaying(false);
+        });
+      } else {
+        playAudioSequence();
+      }
     }
-    setIsPlaying(!isPlaying);
   };
 
   const replayDialog = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-    // Re-trigger typewriter
-    setDisplayedText('');
-    setIsTyping(true);
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (currentIndex < dialogText.length) {
-        setDisplayedText(prev => prev + dialogText.charAt(currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(interval);
-        setIsTyping(false);
-        if (onComplete) onComplete();
-      }
-    }, typingSpeed);
-    
-    // Store interval to clear on unmount could be better, but simpler for now:
-    // This is just a basic implementation.
+    playAudioSequence();
+    startTypewriter();
   };
 
   return (
@@ -107,12 +187,36 @@ export default function DialogPanel({
 
         {/* Audio Controls */}
         <div className="absolute top-3 right-3 flex gap-2">
-          {audioSrc && (
+          {(audioSrc || followupAudioSrc) && (
             <>
               <audio 
                 ref={audioRef} 
                 src={audioSrc} 
-                onEnded={() => setIsPlaying(false)} 
+                onPlay={() => {
+                  activeAudioRef.current = audioRef.current;
+                  setIsPlaying(true);
+                }}
+                onEnded={() => {
+                  if (followupAudioSrc) {
+                    playFollowupAudio();
+                  } else {
+                    activeAudioRef.current = null;
+                    setIsPlaying(false);
+                  }
+                }} 
+                className="hidden"
+              />
+              <audio
+                ref={followupAudioRef}
+                src={followupAudioSrc}
+                onPlay={() => {
+                  activeAudioRef.current = followupAudioRef.current;
+                  setIsPlaying(true);
+                }}
+                onEnded={() => {
+                  activeAudioRef.current = null;
+                  setIsPlaying(false);
+                }}
                 className="hidden"
               />
               <button
