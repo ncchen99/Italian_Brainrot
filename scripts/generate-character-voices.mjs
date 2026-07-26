@@ -58,18 +58,18 @@ const CAST = [
   {
     id: 'level4',
     slug: 'bombardilo-crocodilo',
-    voiceId: 'JBFqnCBsd6RMkjVDRZzb',
-    voiceName: 'George',
+    voiceId: 'pNInz6obpgDQGcFmaJgB',
+    voiceName: 'Adam',
     persona: 'gloating crocodile bomber',
-    settings: { stability: 0.4, similarity_boost: 0.8, style: 0.55 },
+    settings: { stability: 0.4, similarity_boost: 0.8, style: 0.6 },
   },
   {
     id: 'level5',
     slug: 'lirili-larila',
-    voiceId: 'Xb7hH8MSUJpSbSDYk0k2',
-    voiceName: 'Alice',
+    voiceId: 'pFZP5JQG7iQjIQuC4Bku',
+    voiceName: 'Lily',
     persona: 'parched, weary desert wanderer',
-    settings: { stability: 0.45, similarity_boost: 0.75, style: 0.4 },
+    settings: { stability: 0.4, similarity_boost: 0.75, style: 0.45 },
   },
   {
     id: 'level6',
@@ -82,38 +82,12 @@ const CAST = [
   {
     id: 'level7',
     slug: 'tralalero-tralala',
-    voiceId: 'IKne3meq5aSn9XLyUdCD',
-    voiceName: 'Charlie',
+    voiceId: 'SOYHLrjzK2X1ezoPC6cr',
+    voiceName: 'Harry',
     persona: 'hyped-up, furious sneakerhead shark',
-    settings: { stability: 0.3, similarity_boost: 0.75, style: 0.65 },
+    settings: { stability: 0.28, similarity_boost: 0.75, style: 0.7 },
   },
 ];
-
-// Candidate pool used by --list-voices. The API key in use only carries
-// text_to_speech scope, so /v1/voices is unavailable; probing tells us which of
-// the documented default voices this account may actually synthesise with.
-const VOICE_POOL = {
-  Aria: '9BWtsMINqrJLrRacOk9x',
-  Roger: 'CwhRBWXzGAHq8TQ4Fs17',
-  Sarah: 'EXAVITQu4vr4xnSDxMaL',
-  Laura: 'FGY2WhTYpPnrIDTdsKH5',
-  Charlie: 'IKne3meq5aSn9XLyUdCD',
-  George: 'JBFqnCBsd6RMkjVDRZzb',
-  Callum: 'N2lVS1w4EtoT3dr4eOWO',
-  River: 'SAz9YHcvj6GT2YYXdXww',
-  Liam: 'TX3LPaxmHKxFdv7VOQHJ',
-  Charlotte: 'XB0fDUnXU5powFXDhCwa',
-  Alice: 'Xb7hH8MSUJpSbSDYk0k2',
-  Matilda: 'XrExE9yKIg1WjnnlVkGX',
-  Will: 'bIHbv24MWmeRgasZH58o',
-  Jessica: 'cgSgspJ2msm6clMCkdW9',
-  Eric: 'cjVigY5qzO86Huf0OWal',
-  Chris: 'iP95p4xoKVk53GoZ742B',
-  Brian: 'nPczCjzI2devNBz1zQrb',
-  Daniel: 'onwK4e9ZLuTAKqWW03F9',
-  Lily: 'pFZP5JQG7iQjIQuC4Bku',
-  Bill: 'pqHfZKP75CvOlQylNhV4',
-};
 
 const LANGUAGES = ['en', 'ar'];
 
@@ -182,21 +156,49 @@ async function synthesize(apiKey, character, text) {
   return Buffer.from(await response.arrayBuffer());
 }
 
+/**
+ * Lists the voices on the account and probes each one, because being listed is
+ * not the same as being usable: `professional` (voice library) entries return
+ * 402 on a free plan even once added to the account, while `premade` ones work.
+ */
 async function listVoices(apiKey) {
-  console.log(`Probing ${Object.keys(VOICE_POOL).length} default voices against this API key...\n`);
+  const response = await fetch(`${API_BASE.replace('/v1', '/v2')}/voices?page_size=100`, {
+    headers: { 'xi-api-key': apiKey },
+  });
+  if (!response.ok) {
+    throw new Error(`Could not list voices (${response.status}): ${await response.text()}`);
+  }
+
+  const { voices = [] } = await response.json();
+  console.log(`${voices.length} voices on this account. Probing which ones the plan allows...\n`);
+
   const usable = [];
-  for (const [name, voiceId] of Object.entries(VOICE_POOL)) {
-    const response = await fetch(`${API_BASE}/text-to-speech/${voiceId}`, {
+  for (const voice of voices) {
+    const probe = await fetch(`${API_BASE}/text-to-speech/${voice.voice_id}`, {
       method: 'POST',
       headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: 'Hi.', model_id: MODEL_ID }),
     });
-    const ok = response.ok;
-    if (ok) usable.push(name);
-    else await response.arrayBuffer();
-    console.log(`  ${ok ? '✓' : '✗'} ${name.padEnd(10)} ${voiceId}`);
+    await probe.arrayBuffer();
+    if (probe.ok) usable.push(voice);
+
+    const labels = voice.labels || {};
+    const traits = [labels.language, labels.gender, labels.age, labels.accent, labels.descriptive]
+      .filter(Boolean)
+      .join(', ');
+    console.log(
+      `  ${probe.ok ? '✓' : '✗'} ${voice.voice_id}  ${String(voice.category).padEnd(12)} ` +
+      `${voice.name.slice(0, 38).padEnd(38)} ${traits}`
+    );
   }
-  console.log(`\n${usable.length} usable: ${usable.join(', ')}`);
+
+  console.log(`\n${usable.length}/${voices.length} usable via API.`);
+  const blocked = voices.length - usable.length;
+  if (blocked > 0) {
+    console.log(
+      `${blocked} blocked — voice-library voices need a paid plan, even after adding them to the account.`
+    );
+  }
 }
 
 async function main() {

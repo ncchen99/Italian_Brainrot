@@ -64,7 +64,14 @@ cd app && npm run generate:voices
 ```
 
 需在 `app/.env` 設定 `ELEVENLABS_API_KEY`。加上 `--force` 可覆蓋既有檔案，
-`--lang ar` 只產生單一語言，`--list-voices` 會列出這把金鑰可用的聲線。
+`--lang ar` 只產生單一語言，`--list-voices` 會列出帳號聲線並實測哪些可用。
+
+> **方案限制**：免費方案只能透過 API 使用 `premade` 聲線；`professional`
+> （聲音庫）聲線一律回 402，即使已加入帳號也一樣。母語阿拉伯語聲線全部屬於
+> `professional`，因此目前阿拉伯語音是以英語 `premade` 聲線唸阿拉伯文
+> （`eleven_multilingual_v2`），發音正確但帶口音。升級付費方案後，把
+> `scripts/generate-character-voices.mjs` 的 `CAST` 內 `voiceId` 換成母語聲線
+> 再跑 `npm run generate:voices -- --lang ar --force` 即可。
 
 ## 專案結構
 
