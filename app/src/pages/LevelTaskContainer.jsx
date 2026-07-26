@@ -24,9 +24,9 @@ export default function LevelTaskContainer({ children, levelTitle, characterColo
           onClick={() => navigate('/dashboard')}
           className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center text-white backdrop-blur-md border border-white/20 active:scale-90 transition-transform"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={20} className="rtl:rotate-180" />
         </button>
-        <h1 className="flex-1 text-center text-xl font-bold text-white drop-shadow-md pr-10">
+        <h1 className="flex-1 text-center text-xl font-bold text-white drop-shadow-md pe-10">
           {displayTitle}
         </h1>
       </div>

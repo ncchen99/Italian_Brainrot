@@ -309,10 +309,10 @@ export default function SynthesisRoom() {
                   }}
                   placeholder={t('synthesis.joinPlaceholder')}
                   disabled={isJoining}
-                  className="w-full rounded-xl bg-white/5 border border-white/20 px-3 py-3 text-white text-center text-xl font-mono tracking-widest placeholder-gray-600 focus:outline-none focus:border-[#7C5CFC]/60 disabled:opacity-60"
+                  className="force-ltr w-full rounded-xl bg-white/5 border border-white/20 px-3 py-3 text-white text-center text-xl font-mono tracking-widest placeholder-gray-600 focus:outline-none focus:border-[#7C5CFC]/60 disabled:opacity-60"
                 />
                 {isJoining && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="absolute end-3 top-1/2 -translate-y-1/2">
                     <div className="w-4 h-4 border-2 border-[#7C5CFC] border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
@@ -340,7 +340,7 @@ export default function SynthesisRoom() {
             <div className="bg-[#1A1D2E]/80 rounded-2xl border border-[#7C5CFC]/30 px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-400">{t('synthesis.stationCodeLabel')}</p>
-                <p className="text-2xl font-mono font-bold text-[#7C5CFC] tracking-widest">{stationCode}</p>
+                <p className="force-ltr text-2xl font-mono font-bold text-[#7C5CFC] tracking-widest">{stationCode}</p>
               </div>
               <div className="flex flex-col items-end gap-1">
                 <button
@@ -390,7 +390,7 @@ export default function SynthesisRoom() {
                             <>
                               <img src={meta.imageSrc} alt={t(meta.labelKey)} className="w-11 h-11 object-contain" />
                               {isAllyPlaced && (
-                                <span className="absolute -top-2 -right-2 text-[9px] bg-[#4ADE80] text-black font-bold rounded-full px-1 leading-4">
+                                <span className="absolute -top-2 -end-2 text-[9px] bg-[#4ADE80] text-black font-bold rounded-full px-1 leading-4">
                                   {t('synthesis.allyBadge')}
                                 </span>
                               )}

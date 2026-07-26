@@ -649,7 +649,9 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#0D0F1A] text-white relative pb-8">
+    // The admin panel is Chinese-only and not translated, so it stays LTR
+    // regardless of the player-facing language selection.
+    <div dir="ltr" className="w-full min-h-screen bg-[#0D0F1A] text-white relative pb-8">
       {/* Background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 bg-[#7C5CFC]/15 blur-3xl pointer-events-none" />
 

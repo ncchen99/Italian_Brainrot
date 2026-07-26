@@ -124,7 +124,7 @@ export default function Level3TapChallenge() {
         <div className="w-full mt-8">
           <div className="flex justify-between text-xs font-bold mb-1">
             <span className="text-gray-400">{t('level3.progress')}</span>
-            <span className="text-[#4ADE80]">{taps} / {targetTaps}</span>
+            <span className="force-ltr text-[#4ADE80]">{taps} / {targetTaps}</span>
           </div>
           <div className="w-full h-4 bg-gray-800 rounded-full overflow-hidden border border-gray-600">
             <div 

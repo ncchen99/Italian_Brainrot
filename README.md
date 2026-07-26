@@ -42,12 +42,36 @@
 - Level 7：潮鞋防衛戰（跨隊密碼合作）
 - Synthesis：食材盤點與合作合成
 
+## 多語系
+
+支援繁體中文（`zh-TW`）、英文（`en`）、阿拉伯文（`ar`）。  
+阿拉伯文為 RTL 語系，切換時會同步設定 `<html dir="rtl">`；版面採用 CSS 邏輯屬性
+（`ms-*` / `pe-*` / `start-*` / `border-s-*` 等），密碼、數字鍵盤與計時器則以
+`.force-ltr` 保持由左至右。
+
+### 角色語音
+
+角色開場台詞的語音檔依語言分開存放：
+
+- `assets/intro_audio/*.mp3`：中文（原始檔）
+- `assets/intro_audio/en/*.mp3`、`assets/intro_audio/ar/*.mp3`：由 ElevenLabs 產生
+
+語音內容直接取自 `app/src/locales/*.json` 的 `intro.levelN_text`，因此改台詞後
+重新產生即可保持一致。每個角色固定使用不同的 ElevenLabs 聲線，跨語言維持同一個聲音。
+
+```bash
+cd app && npm run generate:voices
+```
+
+需在 `app/.env` 設定 `ELEVENLABS_API_KEY`。加上 `--force` 可覆蓋既有檔案，
+`--lang ar` 只產生單一語言，`--list-voices` 會列出這把金鑰可用的聲線。
+
 ## 專案結構
 
 - `app/`：前端 React + Vite 專案（主要程式碼）
 - `docs/`：劇本、規格、QR 清單、Firebase 設定文件
 - `assets/`：遊戲素材與 QR 圖檔
-- `scripts/`：素材處理工具
+- `scripts/`：素材處理工具、角色語音產生器
 
 ## 相關文件
 

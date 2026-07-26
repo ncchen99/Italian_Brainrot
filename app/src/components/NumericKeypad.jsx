@@ -21,7 +21,8 @@ export default function NumericKeypad({ onKeyPress, onDelete, onSubmit, maxLengt
 
   return (
     <div className="w-full max-w-[280px] mx-auto bg-[#0D0F1A]/80 p-4 rounded-3xl border border-white/10 shadow-xl backdrop-blur-sm">
-      <div className="grid grid-cols-3 gap-3">
+      {/* force-ltr keeps 1-2-3 reading left-to-right; a mirrored keypad is unusable. */}
+      <div className="force-ltr grid grid-cols-3 gap-3">
         {keys.map((key) => {
           const isNum = !['C', '✓'].includes(key);
           const isSubmit = key === '✓';

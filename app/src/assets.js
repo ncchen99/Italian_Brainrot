@@ -61,6 +61,56 @@ export const characterAssets = {
   },
 };
 
+// Character intro voice-overs, one recording per language.
+// Paths are spelled out literally because Vite can only fingerprint and bundle
+// `new URL(...)` assets when the specifier is a static string.
+// The en/ and ar/ files are produced by scripts/generate-character-voices.mjs.
+const introVoices = {
+  'zh-TW': {
+    level1: new URL('../../assets/intro_audio/Cappuccino Assassino.mp3', import.meta.url).href,
+    level2: new URL('../../assets/intro_audio/Ballerina Cappuccina.mp3', import.meta.url).href,
+    level3: new URL('../../assets/intro_audio/Brr Brr Patapim.mp3', import.meta.url).href,
+    level4: new URL('../../assets/intro_audio/Bombardilo Crocodilo.mp3', import.meta.url).href,
+    level5: new URL('../../assets/intro_audio/Lirili Larila.mp3', import.meta.url).href,
+    level6: new URL('../../assets/intro_audio/Tung Tung Tung Sahur.mp3', import.meta.url).href,
+    level7: new URL('../../assets/intro_audio/Tralalero Tralala.mp3', import.meta.url).href,
+  },
+  en: {
+    level1: new URL('../../assets/intro_audio/en/cappuccino-assassino.mp3', import.meta.url).href,
+    level2: new URL('../../assets/intro_audio/en/ballerina-cappuccina.mp3', import.meta.url).href,
+    level3: new URL('../../assets/intro_audio/en/brr-brr-patapim.mp3', import.meta.url).href,
+    level4: new URL('../../assets/intro_audio/en/bombardilo-crocodilo.mp3', import.meta.url).href,
+    level5: new URL('../../assets/intro_audio/en/lirili-larila.mp3', import.meta.url).href,
+    level6: new URL('../../assets/intro_audio/en/tung-tung-tung-sahur.mp3', import.meta.url).href,
+    level7: new URL('../../assets/intro_audio/en/tralalero-tralala.mp3', import.meta.url).href,
+  },
+  ar: {
+    level1: new URL('../../assets/intro_audio/ar/cappuccino-assassino.mp3', import.meta.url).href,
+    level2: new URL('../../assets/intro_audio/ar/ballerina-cappuccina.mp3', import.meta.url).href,
+    level3: new URL('../../assets/intro_audio/ar/brr-brr-patapim.mp3', import.meta.url).href,
+    level4: new URL('../../assets/intro_audio/ar/bombardilo-crocodilo.mp3', import.meta.url).href,
+    level5: new URL('../../assets/intro_audio/ar/lirili-larila.mp3', import.meta.url).href,
+    level6: new URL('../../assets/intro_audio/ar/tung-tung-tung-sahur.mp3', import.meta.url).href,
+    level7: new URL('../../assets/intro_audio/ar/tralalero-tralala.mp3', import.meta.url).href,
+  },
+};
+
+export const INTRO_VOICE_FALLBACK_LANG = 'zh-TW';
+
+/**
+ * Resolves the intro voice-over for a character in the requested language.
+ * Regional tags collapse to their base language ("en-GB" -> "en") and anything
+ * we have not recorded falls back to the original Chinese track.
+ */
+export function getIntroVoice(characterId, language) {
+  const base = String(language || '').split('-')[0];
+  const pack =
+    introVoices[language] ||
+    (base === 'zh' ? introVoices['zh-TW'] : introVoices[base]) ||
+    introVoices[INTRO_VOICE_FALLBACK_LANG];
+  return pack[characterId] || pack.level1;
+}
+
 export const sfx = {
   click: '/assets/sound/sfx/click.mp3',
   success: '/assets/sound/sfx/success.mp3',

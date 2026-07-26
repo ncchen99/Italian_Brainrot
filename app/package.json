@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "process:assets": "node ../scripts/process-assets.mjs"
+    "process:assets": "node ../scripts/process-assets.mjs",
+    "generate:voices": "node ../scripts/generate-character-voices.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -139,15 +139,15 @@ export default function Level7AntennaSync() {
            </div>
         </div>
 
-        <div className="bg-[#0D0F1A] border-l-4 p-4 rounded-r-xl mb-6 shadow-md text-sm text-gray-200" style={{ borderColor: myColorHex }}>
+        <div className="bg-[#0D0F1A] border-s-4 p-4 rounded-e-xl mb-6 shadow-md text-sm text-gray-200" style={{ borderColor: myColorHex }}>
           <p className="mb-2"><Trans i18nKey="level7.rule1" components={{ bold: <span className="font-bold" /> }} values={{ color: partnerColorName }} /></p>
-          <p className="mb-2">{t('level7.rule2')}<span className="text-2xl font-mono block text-center my-2 font-bold tracking-widest">{myCodePart} _ _ _</span></p>
+          <p className="mb-2">{t('level7.rule2')}<span className="force-ltr text-2xl font-mono block text-center my-2 font-bold tracking-widest">{myCodePart} _ _ _</span></p>
           <p>{t('level7.rule3')}</p>
         </div>
         
         {/* Passcode Display */}
         <div className="flex justify-center mb-6">
-          <div className="bg-gray-900 border-2 border-gray-600 rounded-xl px-4 py-3 text-3xl font-mono text-white tracking-widest shadow-inner text-center w-full max-w-[280px]">
+          <div className="force-ltr bg-gray-900 border-2 border-gray-600 rounded-xl px-4 py-3 text-3xl font-mono text-white tracking-widest shadow-inner text-center w-full max-w-[280px]">
             {formatDisplay()}
           </div>
         </div>

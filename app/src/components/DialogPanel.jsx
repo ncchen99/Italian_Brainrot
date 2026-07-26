@@ -186,7 +186,7 @@ export default function DialogPanel({
         )}
 
         {/* Audio Controls */}
-        <div className="absolute top-3 right-3 flex gap-2">
+        <div className="absolute top-3 end-3 flex gap-2">
           {(audioSrc || followupAudioSrc) && (
             <>
               <audio 
@@ -241,7 +241,7 @@ export default function DialogPanel({
         <div className="mt-4 min-h-[80px]">
           <p className="text-lg leading-relaxed text-white">
             {displayedText}
-            {isTyping && <span className="inline-block w-2 h-5 ml-1 bg-[#FBBF24] animate-pulse align-middle"></span>}
+            {isTyping && <span className="inline-block w-2 h-5 ms-1 bg-[#FBBF24] animate-pulse align-middle"></span>}
           </p>
         </div>
       </div>

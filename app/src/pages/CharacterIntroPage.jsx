@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DialogPanel from '../components/DialogPanel';
-import { characterAssets } from '../assets';
+import { characterAssets, getIntroVoice } from '../assets';
 import { useTranslation } from 'react-i18next';
 
 export default function CharacterIntroPage() {
   const { characterId } = useParams();
   const navigate = useNavigate();
   const [dialogFinished, setDialogFinished] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Mock character database
   const characterData = {
@@ -51,16 +51,8 @@ export default function CharacterIntroPage() {
 
   const currentCharacter = characterData[characterId] || characterData['level1'];
   const currentCharacterAsset = characterAssets[characterId] || characterAssets.level1;
-  const introAudioByLevel = {
-    level1: new URL('../../../assets/intro_audio/Cappuccino Assassino.mp3', import.meta.url).href,
-    level2: new URL('../../../assets/intro_audio/Ballerina Cappuccina.mp3', import.meta.url).href,
-    level3: new URL('../../../assets/intro_audio/Brr Brr Patapim.mp3', import.meta.url).href,
-    level4: new URL('../../../assets/intro_audio/Bombardilo Crocodilo.mp3', import.meta.url).href,
-    level5: new URL('../../../assets/intro_audio/Lirili Larila.mp3', import.meta.url).href,
-    level6: new URL('../../../assets/intro_audio/Tung Tung Tung Sahur.mp3', import.meta.url).href,
-    level7: new URL('../../../assets/intro_audio/Tralalero Tralala.mp3', import.meta.url).href
-  };
-  const currentIntroAudio = introAudioByLevel[characterId] || introAudioByLevel.level1;
+  // The spoken line has to match the language the dialogue is printed in.
+  const currentIntroAudio = getIntroVoice(characterId in characterData ? characterId : 'level1', i18n.language);
 
   const handleStartChallenge = () => {
     navigate(`/level/${characterId}`);

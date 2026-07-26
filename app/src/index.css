@@ -20,7 +20,12 @@
   --color-text-muted: #9CA3AF;
   
   --font-handwriting: 'JasonHandwriting2', cursive, sans-serif;
-  
+
+  /* JasonHandwriting2 has no Arabic coverage, so Arabic gets its own stack
+     instead of relying on per-glyph browser fallback. */
+  --font-arabic: 'SF Arabic', 'Geeza Pro', 'Noto Naskh Arabic', 'Segoe UI',
+    'Traditional Arabic', 'Arabic Typesetting', sans-serif;
+
   --animate-float: float 3s ease-in-out infinite;
 }
 
@@ -45,4 +50,24 @@
     /* Use touch-action pan-y to prevent zooming on double tap but allow scrolling */
     touch-action: pan-y;
   }
+
+  /* Also covers Arabic labels shown while the page itself is not Arabic,
+     such as the entries in the language switcher. */
+  [lang='ar'],
+  :root[lang='ar'] body,
+  :root[lang='ar'] button,
+  :root[lang='ar'] input,
+  :root[lang='ar'] textarea,
+  :root[lang='ar'] select {
+    font-family: var(--font-arabic);
+    /* Arabic sits lower and taller in the em box than the Latin/CJK face. */
+    line-height: 1.75;
+  }
+}
+
+/* Codes, timers and keypads stay left-to-right even inside an RTL page:
+   digit groups are read as a unit, so mirroring them would corrupt them. */
+.force-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
 }

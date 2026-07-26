@@ -207,7 +207,7 @@ export default function MainDashboard() {
         <div className="flex flex-col items-end">
           <div className="text-xs text-gray-400 font-bold mb-1">{t('dashboard.meta.remainingTime')}</div>
           {challengeRemainingSeconds === null ? (
-            <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 font-bold font-mono text-xl tracking-wider bg-[#1A1D2E] border-[#7C5CFC]/50 text-white">
+            <div className="force-ltr inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 font-bold font-mono text-xl tracking-wider bg-[#1A1D2E] border-[#7C5CFC]/50 text-white">
               --:--
             </div>
           ) : challengeRemainingSeconds <= 0 ? (

@@ -70,7 +70,8 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#0D0F1A] flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    // Untranslated Chinese-only admin surface; keep it LTR.
+    <div dir="ltr" className="w-full min-h-screen bg-[#0D0F1A] flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Glow orbs */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-[#7C5CFC]/20 blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-0 w-48 h-48 rounded-full bg-[#F97316]/10 blur-3xl pointer-events-none" />

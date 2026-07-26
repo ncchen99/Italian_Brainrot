@@ -44,7 +44,7 @@ export default function CountdownTimer({
 
   return (
     <div className={`
-      inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 font-bold font-mono text-xl shadow-lg transition-colors duration-300 tracking-wider
+      force-ltr inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 font-bold font-mono text-xl shadow-lg transition-colors duration-300 tracking-wider
       ${isDanger ? 'bg-red-900/50 border-red-500 text-red-100' : 
         isWarning ? 'bg-yellow-900/50 border-yellow-500 text-yellow-100' : 
         'bg-[#1A1D2E] border-[#7C5CFC]/50 text-white'}

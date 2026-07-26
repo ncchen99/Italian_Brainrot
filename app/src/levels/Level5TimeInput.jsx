@@ -71,10 +71,10 @@ export default function Level5TimeInput() {
       
       <div className="bg-[#1A1D2E]/80 backdrop-blur-md p-6 rounded-[2rem] border-2 shadow-2xl mb-8" style={{ borderColor: `${currentLevelColor}50` }}>
         
-        <div className="bg-[#0D0F1A] border-l-4 border-[#FBBF24] p-4 rounded-r-xl mb-6 shadow-md text-sm text-gray-200">
+        <div className="bg-[#0D0F1A] border-s-4 border-[#FBBF24] p-4 rounded-e-xl mb-6 shadow-md text-sm text-gray-200">
           <p className="font-bold text-[#FBBF24] mb-2">{t('level5.logicTitle')}</p>
           <p className="mb-2">{t('level5.logicDesc1')}</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 px-2 text-center text-[#4ADE80] font-mono text-base sm:text-lg font-bold mb-4 drop-shadow-md">
+          <div className="force-ltr grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 px-2 text-center text-[#4ADE80] font-mono text-base sm:text-lg font-bold mb-4 drop-shadow-md">
             {prevLocks.map((t, i) => <span key={i}>{t}</span>)}
           </div>
           <p className="text-white font-bold">{t('level5.logicDesc2')}</p>
@@ -82,7 +82,7 @@ export default function Level5TimeInput() {
         
         {/* Time Input Display */}
         <div className="flex justify-center items-center gap-2 mb-8">
-          <div className="bg-gray-900 border-2 border-gray-600 rounded-xl px-6 py-4 text-4xl font-mono text-white tracking-widest shadow-inner">
+          <div className="force-ltr bg-gray-900 border-2 border-gray-600 rounded-xl px-6 py-4 text-4xl font-mono text-white tracking-widest shadow-inner">
             {formatDisplay()}
           </div>
         </div>

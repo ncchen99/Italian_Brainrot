@@ -31,7 +31,7 @@ export default function ItemCard({
   return (
     <button 
       onClick={handleClick}
-      className={`relative rounded-2xl border-2 transition-all duration-300 transform text-left overflow-hidden
+      className={`relative rounded-2xl border-2 transition-all duration-300 transform text-start overflow-hidden
         ${isExpanded ? 'col-span-2 scale-[1.01] z-10 min-h-[156px]' : 'aspect-square hover:scale-105'}
         ${isCollected ? 'bg-[#151A30]/90 border-[#7C5CFC] shadow-[0_0_20px_rgba(124,92,252,0.25)]' : ''}
       `}
@@ -39,7 +39,7 @@ export default function ItemCard({
       <div className="absolute inset-0 bg-gradient-to-t from-[#120E27]/75 via-transparent to-transparent pointer-events-none"></div>
 
       <div
-        className={`absolute transition-all duration-300 rounded-xl overflow-hidden ${isExpanded ? 'left-3 top-3 bottom-3 w-24' : 'inset-0'}`}
+        className={`absolute transition-all duration-300 rounded-xl overflow-hidden ${isExpanded ? 'start-3 top-3 bottom-3 w-24' : 'inset-0'}`}
         style={{ boxShadow: `0 0 22px ${glowColor}88` }}
       >
         {imageSrc ? (
@@ -49,13 +49,13 @@ export default function ItemCard({
         )}
       </div>
 
-      <div className={`relative z-10 flex flex-col h-full p-3 ${isExpanded ? 'ml-28 justify-start pt-4 pb-4 pr-4' : 'justify-end'}`}>
-        <h3 className={`font-bold text-[#FBBF24] drop-shadow-sm inline-block ${isExpanded ? 'text-lg text-left' : 'text-sm text-center self-center bg-black/35 backdrop-blur-sm px-2 py-1 rounded-lg'}`}>
+      <div className={`relative z-10 flex flex-col h-full p-3 ${isExpanded ? 'ms-28 justify-start pt-4 pb-4 pe-4' : 'justify-end'}`}>
+        <h3 className={`font-bold text-[#FBBF24] drop-shadow-sm inline-block ${isExpanded ? 'text-lg text-start' : 'text-sm text-center self-center bg-black/35 backdrop-blur-sm px-2 py-1 rounded-lg'}`}>
           {title}
         </h3>
 
         {isExpanded && description && (
-          <p className="text-xs text-gray-200 mt-2 text-left leading-relaxed animate-in fade-in duration-300">
+          <p className="text-xs text-gray-200 mt-2 text-start leading-relaxed animate-in fade-in duration-300">
             {description}
           </p>
         )}

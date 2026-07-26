@@ -64,9 +64,9 @@ export default function Level4WaterBalloonSort() {
       
       <div className="bg-[#1A1D2E]/80 backdrop-blur-md p-6 rounded-[2rem] border-2 shadow-2xl mb-8 overflow-y-auto max-h-[70vh]" style={{ borderColor: `${currentLevelColor}50` }}>
         
-        <div className="bg-[#0D0F1A] border-l-4 border-[#38BDF8] p-4 rounded-r-xl mb-6 shadow-md text-sm text-gray-200">
+        <div className="bg-[#0D0F1A] border-s-4 border-[#38BDF8] p-4 rounded-e-xl mb-6 shadow-md text-sm text-gray-200">
           <p className="font-bold text-[#38BDF8] mb-2">{t('level4.logicTitle')}</p>
-          <ol className="list-decimal pl-5 space-y-1">
+          <ol className="list-decimal ps-5 space-y-1">
             <li><Trans i18nKey="level4.logic1" components={{ blue: <span className="text-blue-400 font-bold" /> }} /></li>
             <li><Trans i18nKey="level4.logic2" components={{ green: <span className="text-green-400 font-bold" />, red: <span className="text-red-400 font-bold" /> }} /></li>
             <li><Trans i18nKey="level4.logic3" components={{ yellow: <span className="text-yellow-400 font-bold" />, blue: <span className="text-blue-400 font-bold" /> }} /></li>

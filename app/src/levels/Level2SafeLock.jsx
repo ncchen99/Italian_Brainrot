@@ -70,7 +70,7 @@ export default function Level2SafeLock() {
         </p>
         
         {/* Passcode Display */}
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="force-ltr flex justify-center gap-4 mb-8">
           {[0, 1, 2, 3].map((index) => (
             <div 
               key={index}

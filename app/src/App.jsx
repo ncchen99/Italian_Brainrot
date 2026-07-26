@@ -76,7 +76,7 @@ function ImpersonationBanner() {
   if (!isImpersonating) return null;
 
   return (
-    <div className="relative z-50 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-xs px-3 py-2 flex items-center justify-between border-b border-amber-500 shadow-md">
+    <div dir="ltr" className="relative z-50 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-xs px-3 py-2 flex items-center justify-between border-b border-amber-500 shadow-md">
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="animate-pulse flex-shrink-0 w-2 h-2 rounded-full bg-red-400" />
         <span className="font-bold truncate">

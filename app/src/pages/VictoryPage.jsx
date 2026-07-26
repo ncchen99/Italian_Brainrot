@@ -68,7 +68,7 @@ export default function VictoryPage() {
            
            <div className="w-full flex justify-between items-start mt-4 mb-6">
              <img src={uiImages.ultimatePizza} alt={t('synthesis.pizzaName')} className="w-16 h-16 object-contain drop-shadow-md" />
-             <div className="text-right">
+             <div className="text-end">
                 <div className="text-xs text-gray-400 font-bold mb-1">{t('victory.certNumber')}</div>
                 <div className="text-[#38BDF8] font-mono">PIZZA-001</div>
              </div>

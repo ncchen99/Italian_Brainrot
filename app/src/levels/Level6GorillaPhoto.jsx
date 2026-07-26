@@ -160,8 +160,8 @@ export default function Level6GorillaPhoto() {
             <>
               <img src={photoUrl} alt="Uploaded" className="w-full h-full object-cover" />
               {/* Overlay Watermark */}
-              <div className="absolute top-2 right-2 flex items-center bg-black/60 rounded-lg p-2 backdrop-blur-sm border border-white/20">
-                <img src={characterAssets.level6.image} alt="Tung Tung Tung Sahur" className="w-6 h-6 mr-2 object-contain" />
+              <div className="absolute top-2 end-2 flex items-center bg-black/60 rounded-lg p-2 backdrop-blur-sm border border-white/20">
+                <img src={characterAssets.level6.image} alt="Tung Tung Tung Sahur" className="w-6 h-6 me-2 object-contain" />
                 <span className="text-[10px] text-white font-bold leading-none">Tung Tung<br />Sahur</span>
               </div>
             </>

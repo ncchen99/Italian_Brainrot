@@ -71,7 +71,7 @@ function SlotDropArea({ index, slot, activeOverId, onQuickReturn }) {
 
   return (
     <div className="flex items-center">
-      <span className="w-8 text-center font-bold text-gray-500 mr-2">{index + 1}.</span>
+      <span className="force-ltr w-8 text-center font-bold text-gray-500 me-2">{index + 1}.</span>
       <div
         ref={setNodeRef}
         className={`
