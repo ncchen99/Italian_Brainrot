@@ -50,6 +50,7 @@ export default function QRCodeScannerModal({ isOpen, onClose, onScan }) {
   const scannerRef = useRef(null);
   const handledRef = useRef(false);
   const [errorText, setErrorText] = useState('');
+  const [manualCode, setManualCode] = useState('');
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -135,6 +136,31 @@ export default function QRCodeScannerModal({ isOpen, onClose, onScan }) {
             {errorText}
           </div>
         ) : null}
+        <div className="pt-2 border-t border-white/10 flex gap-2">
+          <input
+            type="text"
+            placeholder="輸入短碼 (1~8) 或 QR 碼"
+            value={manualCode}
+            onChange={(e) => setManualCode(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && manualCode.trim()) {
+                onScan(manualCode.trim());
+              }
+            }}
+            className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-[#7C5CFC]"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (manualCode.trim()) {
+                onScan(manualCode.trim());
+              }
+            }}
+            className="bg-gradient-to-r from-[#7C5CFC] to-[#5b41c2] text-white px-4 py-2 rounded-xl text-sm font-bold active:scale-95 transition-transform"
+          >
+            確定
+          </button>
+        </div>
       </div>
     </Modal>
   );
