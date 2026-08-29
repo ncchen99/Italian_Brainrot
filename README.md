@@ -3,6 +3,11 @@
 一個給校園活動使用的 **手機網頁闖關遊戲**。  
 玩家（小隊）要在限時內掃描校園 QR Code，完成 7 個角色關卡，收集披薩食材，最後進入合成站合作完成終極任務。
 
+<img src="docs/screenshots/login.png" width="270" alt="登入">&nbsp;<img src="docs/screenshots/dashboard.png" width="270" alt="小隊背包與倒數">&nbsp;<img src="docs/screenshots/character-intro.png" width="270" alt="角色開場">
+
+全站是手機直向設計（上面是 iPhone 尺寸的畫面）。掃到 QR Code 後先看角色開場白，
+接受挑戰才進關卡；背包會顯示已收集的食材和剩下的時間。
+
 ## 這個遊戲在做什麼
 
 - 以「瑪瑪咪呀學園」為舞台的實境解謎闖關
@@ -41,6 +46,11 @@
 - Level 6：小心暴走猩猩（拍照/認證）
 - Level 7：潮鞋防衛戰（跨隊密碼合作）
 - Synthesis：食材盤點與合作合成
+
+<img src="docs/screenshots/level1.png" width="330" alt="Level 1 忍者的修煉">&nbsp;<img src="docs/screenshots/synthesis.png" width="330" alt="合成協作站">
+
+左邊是 Level 1「忍者的修煉」（把結印排回正確順序），右邊是最後的合成協作站 ——
+食材不齊時會告訴你哪一隊補得上，兩隊互換代碼才能完成合成。
 
 ## 多語系
 
